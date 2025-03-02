@@ -16,8 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from .views import (
+    ping,
+    index
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include('app.urls')),
+    path('ping/', ping, name='ping'),
+    path('', index, name='index'),
 ]

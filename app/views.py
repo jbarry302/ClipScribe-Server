@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
+from django.http import JsonResponse
 from django.conf import settings
 import whisper
 from django.views.decorators.csrf import csrf_exempt
@@ -11,12 +10,24 @@ model = whisper.load_model(
     in_memory=True
 )
 
+def file_size(val, unit):
+    if unit == 'KB':
+        return val * 1024
+    elif unit == 'MB':
+        return val * 1024 * 1024
+    elif unit == 'GB':
+        return val * 1024 * 1024 * 1024
+    return val
+
+
 @csrf_exempt
 def transcribe(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Method not allowed'}, status=405)
     if 'file' not in request.FILES:
         return JsonResponse({'error': 'No media file provided'}, status=400)
+    if request.FILES['file'].size > file_size(50, 'MB'):
+        return JsonResponse({'error': 'File size limit exceeded'}, status=400)
 
     try:
         media_file = request.FILES['file']
